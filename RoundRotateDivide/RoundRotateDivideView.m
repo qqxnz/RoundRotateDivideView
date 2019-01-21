@@ -14,8 +14,9 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
+        self.backgroundColor = UIColor.clearColor;
         _labList = [[NSMutableArray alloc]init];
-        _labTextList = [[NSMutableArray alloc]init];
+        _lineList = [[NSMutableArray alloc]init];
         CAShapeLayer *solidLine =  [CAShapeLayer layer];
         CGMutablePathRef solidPath =  CGPathCreateMutable();
         solidLine.lineWidth = 1.0f ;
@@ -37,7 +38,6 @@
     CGFloat angle = 360.0 / divide;//单个刻度角度
 //    NSLog(@"角度%f",angle);
     for(int i = 0 ; i < divide ; i++){
-        [_labTextList addObject:[NSString stringWithFormat:@"%d",i]];
         CGFloat height = 10;
         CGFloat width = 1;
         CGFloat cha = 10;
@@ -66,13 +66,18 @@
             width = 1;
             cha = cha * 1.25;
         }
-        UIView *line = [[UIView alloc]initWithFrame:CGRectMake(0, 0, width, height)];
-        line.backgroundColor = UIColor.blackColor;
-        CGFloat x = (self.bounds.size.height * 0.5 + 5 - cha)* cosf(radian);
-        CGFloat y = (self.bounds.size.height * 0.5 + 5 - cha)* sinf(radian);
-        line.center = CGPointMake(x + self.bounds.size.height * 0.5, y + self.bounds.size.height * 0.5);
-        line.layer.affineTransform = CGAffineTransformMakeRotation(radian - aradian);
-        [self addSubview:line];
+        CGFloat tx = (self.bounds.size.height * 0.5 + 15 - cha)* cosf(radian);
+        CGFloat ty = (self.bounds.size.height * 0.5 + 15 - cha)* sinf(radian);
+
+        CGFloat ex = (self.bounds.size.height * 0.5  - cha)* cosf(radian);
+        CGFloat ey = (self.bounds.size.height * 0.5  - cha)* sinf(radian);
+        LinePoint * pt = [[LinePoint alloc]init];
+        pt.start_x = tx;
+        pt.start_y = ty;
+        pt.end_x = ex;
+        pt.end_y = ey;
+        
+        [_lineList addObject:pt];
     }
     
 }
@@ -116,12 +121,37 @@
 }
 
 
-/*
+
 // Only override drawRect: if you perform custom drawing.
 // An empty implementation adversely affects performance during animation.
 - (void)drawRect:(CGRect)rect {
-    // Drawing code
+    for(int i =0 ; i < _lineList.count;i++){
+        LinePoint * pt = (LinePoint *)_lineList[i];
+        // Drawing code
+        [[UIColor blackColor] setStroke];
+        //1、创建路径
+        UIBezierPath *path = [UIBezierPath bezierPath];
+        //2、设置起点
+        [path moveToPoint:CGPointMake(self.bounds.size.height * 0.5 + pt.start_x, self.bounds.size.height * 0.5 + pt.start_y)];
+        //设置终点
+        [path addLineToPoint:CGPointMake(self.bounds.size.height * 0.5 + pt.end_x,self.bounds.size.height * 0.5 + pt.end_y)];
+        
+        [path setLineWidth:1.0];
+        [path stroke];
+    }
+    
+    ///覆盖
+    UIBezierPath *trackPath = [UIBezierPath bezierPathWithArcCenter:CGPointMake(self.bounds.size.height * 0.5, self.bounds.size.height * 0.5) radius:self.bounds.size.height * 0.5 + 3 startAngle:0 endAngle:M_PI*2 clockwise:YES];
+    [trackPath setLineWidth:6];
+    [[UIColor whiteColor] setStroke];
+    [trackPath stroke];
 }
-*/
+
+
+@end
+
+
+@implementation LinePoint
+
 
 @end
